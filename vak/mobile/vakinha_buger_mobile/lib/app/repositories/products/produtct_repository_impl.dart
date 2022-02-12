@@ -1,0 +1,33 @@
+import 'dart:developer';
+
+import 'package:vakinha_burger_mobile/app/core/rest_client/rest_client.dart';
+import 'package:vakinha_burger_mobile/app/models/product_model.dart';
+
+import './produtct_repository.dart';
+
+class ProdutctRepositoryImpl implements ProdutctRepository {
+  final RestClient _restClient;
+
+  ProdutctRepositoryImpl({
+    required RestClient restClient,
+  }) : _restClient = restClient;
+  
+  @override
+  Future<List<ProductModel>> findAll() async {
+    final result = await _restClient.get('/products/');
+
+    if (result.hasError) {
+      log(
+        'Erro ao buscar produtos ${result.statusCode}',
+        error: result.statusText,
+        stackTrace: StackTrace.current,
+      );
+
+      throw RestClientException('Erro ao buscar produtos');
+    }
+
+    return result.body
+        .map<ProductModel>((p) => ProductModel.fromMap(p))
+        .toList();
+  }
+}
